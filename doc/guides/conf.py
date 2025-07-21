@@ -81,9 +81,9 @@ html_theme_options = {
     },
 }
  
-#extensions = [
-#    "sphinx_multiversion",
-#]
+extensions = [
+    "sphinx_multiversion",
+]
  
 #smv_branch_whitelist = r"^dao-(\d{2}\.\d{2})$|^dao-devel$"
 #smv_tag_whitelist = r""
