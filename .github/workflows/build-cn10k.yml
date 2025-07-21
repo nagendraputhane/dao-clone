@@ -91,14 +91,32 @@ jobs:
             cp "dao-cn10k${PKG_POSTFIX}_${PKG_VERSION_NAME}_arm64.deb" ${BASE_DIR}/artifacts/.
       - name: Generate versions.json for drop‑down
         run: |
+          set -e
           cd build/doc/guides/html
-          versions=$(printf '%s\n' */ | sed 's#/##')
-          jq -n --arg vers "$versions" '
-            ($vers | split("\n") | map(select(. != "")) ) as $v |
-            [ {version:"latest", url:"/dao/guides/"} ] +
-            ( $v | map(select(.!="dao-devel"))   # skip dev duplicate
-                | map({version: sub("^dao-";""); url: ("/dao/" + . + "/guides/")}) )
+
+          # collect folder names (e.g. "docs", "docs-v1", "docs-v2")
+          folders=$(printf '%s\n' */ | sed 's#/##' | tr '\n' ' ')
+
+          # build versions.json
+          jq -n --arg folders "$folders" '
+            # split into an array, drop any empties
+            ($folders | split(" ") | map(select(length>0))) as $f
+            |
+            # always start with "latest" → /dao/guides/
+            [ {version:"latest", url:"/dao/guides/"} ]
+            +
+            # then for each other folder, map docs-vX → {version:"vX", url:"/dao/docs-vX/guides/"}
+            (
+              $f
+              | map(select(. != "docs"))
+              | map({
+                  version: ( . | sub("^docs-","") ),
+                  url:      ( "/dao/" + . + "/guides/" )
+                })
+            )
           ' > versions.json
+
+          mv versions.json "$GITHUB_WORKSPACE/gen_docs/"
           cd -
       - name: Collect docs
         run: |
