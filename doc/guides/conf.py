@@ -20,6 +20,10 @@
 
 # -- Project information -----------------------------------------------------
 
+from datetime import datetime
+import os
+import re
+
 project = 'Data Accelerator Offload'
 copyright = '2024, Marvell'
 author = 'Marvell'
@@ -52,7 +56,7 @@ exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 #
-html_theme = 'sphinx_rtd_theme'
+html_theme = 'pydata-sphinx-theme'
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
@@ -62,6 +66,27 @@ html_static_path = ['_static']
 
 # These paths are either relative to html_static_path
 # or fully qualified paths (eg. https://...)
-html_css_files = [
-    'css/custom.css',
+
+branch = os.environ.get("GITHUB_REF_NAME", "local")
+if branch.startswith("dao-"):
+    release= branch.replace("dao-", "")
+elif branch == "dao-devel":
+    release = "latest"
+else:
+    release = branch
+ 
+html_theme_options = {
+    "navbar_end": ["version-switcher", navbar-icon-links"],
+    "switcher": {
+        "json_url": "https://marvellembeddedprocessors.github.io/dao/versions.json",
+        "version_match": release,
+    },
+}
+ 
+extensions = [
+    "sphinx_multiversion",
 ]
+ 
+smv_branch_whitelist = r"^dao-(\d{2}\.\d{2})$|^dao-devel$"
+smv_tag_whitelist = r""
+smv_outputdir_format = "{ref.name}"
