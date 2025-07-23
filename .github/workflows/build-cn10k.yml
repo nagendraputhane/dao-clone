@@ -50,6 +50,7 @@ jobs:
       - name: Build DAO and generate package
         id: build
         run: |
+            set -x
             mkdir -p ~/.ccache
             sudo apt-get update -q -y
             sudo apt-get install -y build-essential gcc meson ccache git doxygen apt-utils
@@ -102,7 +103,13 @@ jobs:
             done
             git checkout $TRIGGER_REF
 
-            mv build/doc/guides/html gen_docs/guides
+      - name: Rearrange docs for pages
+        run: |
+          mkdir -p pages
+          cp -r gen_docs/dao-devel/guides/ pages/guides
+          mkdir -p pages/dao-25.05
+          cp -r gen_docs/dao-25.05/guides/ pages/dao-25.05/guides
+
       - name: Export version name
         id: artifacts
         run: |
@@ -136,7 +143,7 @@ jobs:
         uses: actions/upload-pages-artifact@v3
         if: ${{ github.event_name == 'push' }}
         with:
-          path: ${{ github.workspace }}/gen_docs
+          path: pages
       - name: Deploy Github Pages
         if: ${{ github.event_name == 'push' }}
         uses: actions/deploy-pages@v4.0.5
