@@ -37,8 +37,9 @@ master_doc = 'index'
 # ones.
 extensions = [
     "sphinx_copybutton" ,
-    "sphinx_version_dropdown" ,
 ]
+
+extensions += ["sphinxcontrib.versioning"]
 
 # Add any paths that contain templates here, relative to this directory.
 #templates_path = ['_templates']
@@ -56,12 +57,11 @@ exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 #
 html_theme = 'sphinx_rtd_theme'
 
-html_theme_options = {
-    "version_dropdown": True,
-    "version_info": [
-        ("latest", "/dao-clone/guides/"),
-        ("25.05", "/dao-clone/dao-25.05/guides/"),
-    ],
+versioning_config = {
+    "whitelist_branches": ["dao-devel", "dao-25.05"],
+    "whitelist_tags": [],
+    "output_dir": "gen_docs/${ref.name}",
+    "template": "version_dropdown.html",
 }
 
 # Add any paths that contain custom static files (such as style sheets) here,
