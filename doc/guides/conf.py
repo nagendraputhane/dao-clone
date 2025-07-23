@@ -37,12 +37,7 @@ master_doc = 'index'
 # ones.
 extensions = [
     "sphinx_copybutton" ,
-    "sphinx_multiversion" ,
 ]
-
-smv_branch_whitelist = r"^dao-(\d{2}\.\d{2})$|^dao-devel$" # Matches branches like dao-25.05, dao-devel
-smv_tag_whitelist = r"^$"
-smv_outputdir_format = "{ref.name}"
 
 # Add any paths that contain templates here, relative to this directory.
 #templates_path = ['_templates']
