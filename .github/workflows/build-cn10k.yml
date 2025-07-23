@@ -57,7 +57,7 @@ jobs:
             sudo apt-get install -y libnl-3-dev libnl-route-3-dev libnl-xfrm-3-dev
             sudo apt-get install -y sphinx-common python3-sphinx-rtd-theme pkg-config
             sudo apt-get install -y python3-pip
-            sudo pip3 install sphinx-copybutton
+            sudo pip3 install sphinx-copybutton sphinx-version-dropdown
             sudo apt-get install -y libarchive-dev libbsd-dev libbpf-dev
             sudo apt-get install -y libfdt-dev libjansson-dev software-properties-common
             sudo apt-get install -y libssl-dev ninja-build python3-pip

@@ -37,6 +37,7 @@ master_doc = 'index'
 # ones.
 extensions = [
     "sphinx_copybutton" ,
+    "sphinx_version_dropdown" ,
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -54,6 +55,14 @@ exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 # a list of builtin themes.
 #
 html_theme = 'sphinx_rtd_theme'
+
+html_theme_options = {
+    "version_dropdown": True,
+    "version_info": [
+        ("latest", "/dao-clone/guides/"),
+        ("25.05", "/dao-clone/dao-25.05/guides/"),
+    ],
+}
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
