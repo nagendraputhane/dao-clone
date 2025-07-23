@@ -39,10 +39,8 @@ extensions = [
     "sphinx_copybutton" ,
 ]
 
-extensions += ["sphinxcontrib.versioning"]
-
 # Add any paths that contain templates here, relative to this directory.
-#templates_path = ['_templates']
+templates_path = ['_templates']
 
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
@@ -57,12 +55,6 @@ exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 #
 html_theme = 'sphinx_rtd_theme'
 
-versioning_config = {
-    "whitelist_branches": ["dao-devel", "dao-25.05"],
-    "whitelist_tags": [],
-    "output_dir": "gen_docs/${ref.name}",
-    "template": "version_dropdown.html",
-}
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
