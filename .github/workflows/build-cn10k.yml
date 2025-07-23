@@ -52,8 +52,7 @@ jobs:
             sudo apt-get update -q -y
             sudo apt-get install -y build-essential gcc meson ccache git doxygen apt-utils
             sudo apt-get install -y libnl-3-dev libnl-route-3-dev libnl-xfrm-3-dev
-            sudo apt-get install -y sphinx-common pkg-config
-            sudo pip3 install pydata-sphinx-theme sphinx-multiversion
+            sudo apt-get install -y sphinx-common python3-sphinx-rtd-theme pkg-config
             sudo apt-get install -y libarchive-dev libbsd-dev libbpf-dev
             sudo apt-get install -y libfdt-dev libjansson-dev software-properties-common
             sudo apt-get install -y libssl-dev ninja-build python3-pip
@@ -61,17 +60,23 @@ jobs:
             sudo apt-get install -y gcc-14 bzip2-doc icu-devtools libacl1-dev libattr1-dev
             sudo apt-get install -y libbz2-dev libgmp-dev libgmpxx4ldbl libicu-dev liblz4-dev
             sudo apt-get install -y liblzma-dev libxml2-dev libzstd-dev nettle-dev wget lsb-release
+            sudo apt-get install -y gcc-aarch64-linux-gnu g++-aarch64-linux-gnu
             DISTRO=ubuntu-`lsb_release -rs`
             source "${PWD}/artifacts/env"
             echo "DISTRO=${DISTRO}" >> ${PWD}/artifacts/env
             BASE_DIR=${PWD}
             wget "https://github.com/MarvellEmbeddedProcessors/marvell-dpdk/releases/download/dpdk-cn10k-${DPDK_BASE_PKG_VERSION}_${DPDK_PKG_VERSION}-${DISTRO}-${DPDK_PKG_VERSION}/dpdk-${DPDK_BASE_PKG_VERSION}-cn10k_${DPDK_PKG_VERSION}_arm64.deb"
             sudo apt-get install -y ./"dpdk-${DPDK_BASE_PKG_VERSION}-cn10k_${DPDK_PKG_VERSION}_arm64.deb"
-            export CC='ccache gcc-14'
-            echo "cache_dir = ~/.ccache" > ~/.ccache/ccache.conf
             ccache -p
             pkg-config --list-all
-            meson build -Dplatform=cn10k --prefix="${PWD}/install" -Denable_kmods=false
+            unset CC
+            unset CXX
+            export GRPC_BUILD_DIR=/tmp/dao-deps-build
+            ./ci/build/build-deps.sh $GRPC_BUILD_DIR dummyuser cn10k grpc > /dev/null 2>&1
+            export PATH=$GRPC_BUILD_DIR/deps/deps-prefix/host/bin:$PATH
+            export LD_LIBRARY_PATH=$GRPC_BUILD_DIR/deps/deps-prefix/host/lib:$LD_LIBRARY_PATH
+            export PKG_CONFIG_PATH="$GRPC_BUILD_DIR/deps/deps-prefix/ep/lib/pkgconfig:$GRPC_BUILD_DIR/deps/host/grpc/third_party/re2:${PKG_CONFIG_PATH:-}"
+            meson build -Dplatform=cn10k --prefix="${PWD}/install" -Denable_kmods=false -Dprefer_static_build=true --prefer-static
             ninja install -C build
             mkdir -p "${PWD}/install/DEBIAN"
             mkdir -p "${PWD}/install/debian"
@@ -86,44 +91,13 @@ jobs:
             echo "Description: Data Accelerator offload for Marvell Octeon 10" >> DEBIAN/control
             rm -rf debian
             cd -
+            rm -rf "${PWD}/install/~" "${PWD}/install/home"
             mv "${PWD}/install" "${PWD}/dao-cn10k${PKG_POSTFIX}_${PKG_VERSION_NAME}_arm64"
             dpkg --build "dao-cn10k${PKG_POSTFIX}_${PKG_VERSION_NAME}_arm64"
             cp "dao-cn10k${PKG_POSTFIX}_${PKG_VERSION_NAME}_arm64.deb" ${BASE_DIR}/artifacts/.
-      - name: Generate versions.json for drop‑down
-        run: |
-          set -e
-          cd build/doc/guides/html
-
-          # collect folder names (e.g. "docs", "docs-v1", "docs-v2")
-          folders=$(printf '%s\n' */ | sed 's#/##' | tr '\n' ' ')
-
-          # build versions.json
-          jq -n --arg folders "$folders" '
-            # split into an array, drop any empties
-            ($folders | split(" ") | map(select(length>0))) as $f
-            |
-            # always start with "latest" → /dao/guides/
-            [ {version:"latest", url:"/dao/guides/"} ]
-            +
-            # then for each other folder, map docs-vX → {version:"vX", url:"/dao/docs-vX/guides/"}
-            (
-              $f
-              | map(select(. != "docs"))
-              | map({
-                  version: ( . | sub("^docs-","") ),
-                  url:      ( "/dao/" + . + "/guides/" )
-                })
-            )
-          ' > versions.json
-
-          mv versions.json "$GITHUB_WORKSPACE/gen_docs/"
-          cd -
-      - name: Collect docs
-        run: |
-          mkdir -p gen_docs
-          cp -r build/doc/guides/html/dao-devel gen_docs/guides
-          cp -r build/doc/guides/html/dao-* gen_docs/ || true
-          cp versions.json gen_docs/
+            mkdir -p gen_docs
+            mv build/doc/guides/html gen_docs/guides
+            mv build/doc/api/html gen_docs/api
       - name: Export version name
         id: artifacts
         run: |
@@ -161,4 +135,3 @@ jobs:
       - name: Deploy Github Pages
         if: ${{ github.event_name == 'push' }}
         uses: actions/deploy-pages@v4.0.5
-
