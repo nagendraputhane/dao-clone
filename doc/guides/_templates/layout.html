@@ -1,9 +1,0 @@
-{% extends "!layout.html" %}
-{% block header %}
-  {{ super() }}
-  <select onchange="location.href=this.value"
-          style="float:right;margin:0.5em;padding:0.2em;">
-    <option value="/dao-clone/guides/">latest</option>
-    <option value="/dao-clone/25.05/guides/">25.05</option>
-  </select>
-{% endblock %}

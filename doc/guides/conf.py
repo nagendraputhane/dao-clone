@@ -13,8 +13,8 @@
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #
-# import os
-# import sys
+import os
+import sys
 # sys.path.insert(0, os.path.abspath('.'))
 
 
@@ -38,6 +38,8 @@ master_doc = 'index'
 extensions = [
 ]
 
+extensions += ["sphinx_multiversion"]
+
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
 
@@ -52,7 +54,23 @@ exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 #
-html_theme = 'sphinx_rtd_theme'
+html_theme = 'pydata_sphinx_theme'
+
+smv_branch_whitelist = r'^dao-.*|^dao-devel$'
+smv_tag_whitelist = r'^$'
+smv_remote_whitelist = r'^origin$'
+
+version = "dao-25.05"
+
+html_context = {"version": version}
+
+html_theme_options = {
+    "switcher": {
+        "json_url": "https://nagendraputhane.github.io/dao-clone/versions.json",
+        "version_match": version,
+    },
+    "navbar_end": ["version-switcher", "theme-switcher"],
+}
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
@@ -62,6 +80,4 @@ html_static_path = ['_static']
 
 # These paths are either relative to html_static_path
 # or fully qualified paths (eg. https://...)
-html_css_files = [
-    'css/custom.css',
-]
+
