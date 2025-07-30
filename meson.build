@@ -65,13 +65,6 @@ if DAO_BUILD_CONF.has('DAO_LIBDPDK_DEP')
 	subdir('tests')
 endif
 
-doxygen = find_program('doxygen', required: false)
-if doxygen.found()
-    subdir('doc')
-else
-    warning('Doxygen not found. Skipping the documentation build!')
-endif
-
 if enable_kmods
     subdir('kmod')
 endif

@@ -55,7 +55,7 @@ jobs:
             sudo apt-get install -y build-essential gcc meson ccache git doxygen apt-utils
             sudo apt-get install -y libnl-3-dev libnl-route-3-dev libnl-xfrm-3-dev
             sudo apt-get install -y sphinx-common python3-pip pkg-config
-            pip install "pydata-sphinx-theme>=0.16" "sphinx-multiversion>=0.2.4"
+            pip install "pydata-sphinx-theme>=0.16" "sphinx-multiversion>=0.2.4" "sphinx-copybutton" "sphinx-design"
             sudo apt-get install -y libarchive-dev libbsd-dev libbpf-dev
             sudo apt-get install -y libfdt-dev libjansson-dev software-properties-common
             sudo apt-get install -y libssl-dev ninja-build python3-pip
