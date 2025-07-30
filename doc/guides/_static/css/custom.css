@@ -1,11 +1,25 @@
-.wy-side-nav-search, .wy-nav-top {
-	    background: #222c32;
+/* ----------------------------------------------------------- */
+/*  Global tweaks                                              */
+/* ----------------------------------------------------------- */
+
+/* Bigger logo height – keep in sync with navbar size */
+:root {
+  --pst-navbar-height: 64px;
 }
 
-.wy-nav-side {
-	    background: #222c32;
+.navbar-brand .logo__image {
+  height: var(--pst-navbar-height);
+  max-height: var(--pst-navbar-height);
 }
 
-.wy-nav-content {
-	    max-width: none;
+/* Show only the magnifier icon (no “Search” label / shortcut) */
+.search-button__default-text,
+.search-button__kbd-shortcut,
+.navbar-persistent--container .search-button-field {
+  display: none !important;
+}
+
+/* Force light mode — remove sun/moon toggle completely */
+.theme-switch-button {
+  display: none !important;
 }

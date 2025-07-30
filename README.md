@@ -2,7 +2,7 @@
 
 ## Programmers Guide
 
-https://nagendraputhane.github.io/dao-clone/guides/
+https://nagendraputhane.github.io/dao-clone
 
 ## API Reference Guide
 
