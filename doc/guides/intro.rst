@@ -4,6 +4,8 @@
 Introduction
 ============
 
+This is DAO 25.05.0 release documentation.
+
 The Data Accelerator Offload (DAO) empowers the capabilities of Marvell’s
 Octeon, enabling application developers and Marvell’s technology partners
 to achieve breakthrough networking, security and storage performance.
