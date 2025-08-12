@@ -31,7 +31,7 @@ html_theme_options = {
         "version_match": version,
     },
     "external_links": [
-        {"name": "Home", "url": "./"},
+        {"name": "Home", "url": "https://nagendraputhane.github.io/dao-clone/"},
     ],
     "icon_links": [
         {
@@ -53,7 +53,10 @@ html_meta = {
 
 html_static_path   = ["_static"]
 html_css_files     = ["css/custom.css"]
-html_js_files      = ["js/titleprefix.js"]
+html_js_files = [
+    "js/version_switcher_match.js",
+]
+
 html_favicon       = "_static/tab_logo.jpg"
 html_show_sourcelink = False
 
