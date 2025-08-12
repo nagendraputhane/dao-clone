@@ -1,34 +1,39 @@
 # SPDX-License-Identifier: Marvell-MIT
-# Copyright (c) 2024 Marvell.
 
-sphinx = find_program(
-	'sphinx-build-3',
-	required: false
+sphinx = find_program('sphinx-build', required: false)
+if not sphinx.found()
+  sphinx = find_program('sphinx-build-3', required: false)
+endif
+if not sphinx.found()
+  message('sphinx-build not found; skipping Guides (single-version).')
+  subdir_done()
+endif
+
+# Minimal inputs (add more files if you want Meson to re-run when they change)
+docs_inputs = files(
+  'conf.py',
+  'index.rst',
+  'guides.rst',
+  'resources.rst',
 )
 
-if not sphinx.found()
-	sphinx = find_program(
-		'sphinx-build',
-		required: false
-	)
-endif
+# Assets that are safe to track (fine even if SMV also uses them later)
+docs_assets = files(
+  '_static/css/custom.css',
+  '_static/js/titleprefix.js',
+  '_static/js/version_switcher_match.js',
+  '_static/versions.json',
+)
 
-if not sphinx.found()
-	subdir_done()
-endif
-
-docs_sources = [
-	'index.rst',
-]
-
-htmldir = join_paths(get_option('datadir'), 'doc', 'DAO', 'user-guide')
+outdir = meson.current_build_dir() / 'html-single'
 
 custom_target(
-	'End User Documentation',
-	command: [sphinx, '-q', '-W', '-b', 'html', meson.current_source_dir(), '@OUTPUT@'],
-	input: docs_sources,
-	output: 'html',
-	build_by_default: true,
-	install: true,
-	install_dir: htmldir
+  'DAO Documentation (single-version)',
+  input:  docs_inputs + docs_assets,
+  output: 'html-single',
+  command: [sphinx, '-q', '-W', '-b', 'html', meson.current_source_dir(), outdir],
+  build_by_default: true,
+  console: true,
+  install: true,
+  install_dir: join_paths(get_option('datadir'), 'doc', 'DAO', 'user-guide')
 )

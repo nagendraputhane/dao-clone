@@ -14,9 +14,13 @@ master_doc = "index"
 # ---------------------------------------------------------------------------
 extensions = ["sphinx_copybutton", "sphinx_multiversion", "sphinx_design"]
 
-smv_branch_whitelist = r"^dao-.*|^dao-devel$"
-smv_tag_whitelist    = r"^$"
+# Only build remote branches from "origin"
 smv_remote_whitelist = r"^origin$"
+# Match the *short* branch names (not full refs/)
+smv_branch_whitelist = r"^(dao\-.*|dao\-devel)$"
+smv_tag_whitelist    = r"^$"
+
+# Keep readable output folder names
 smv_outputdir_format = "{ref.name}"
 
 # ---------------------------------------------------------------------------
@@ -41,7 +45,6 @@ html_theme_options = {
             "type": "fontawesome",
         },
     ],
-    "default_mode": "light",                       # light-only
     "navbar_end": ["search-button",
                    "version-switcher",
                    "navbar-icon-links"],
