@@ -98,6 +98,15 @@ jobs:
             cp -r build/doc/guides/html/dao-devel/* build/doc/guides/html/
             # GitHub Pages: disable Jekyll so underscores are served
             touch build/doc/guides/html/.nojekyll
+      - name: Print sphinx-multiversion log
+        if: always()
+        run: |
+          if [ -f build/doc/guides/html/_smv.log ]; then
+            echo "===== sphinx-multiversion log ====="
+            tail -n +1 build/doc/guides/html/_smv.log
+          else
+            echo "No _smv.log found."
+          fi
       - name: Export version name
         id: artifacts
         run: |

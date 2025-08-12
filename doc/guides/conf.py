@@ -14,7 +14,7 @@ master_doc = "index"
 # ---------------------------------------------------------------------------
 extensions = ["sphinx_copybutton", "sphinx_multiversion", "sphinx_design"]
 
-smv_branch_whitelist = r"^dao-.*|^dao-devel$"
+smv_branch_whitelist = r"^(dao\-.*|dao\-devel)$"
 smv_tag_whitelist    = r"^$"
 smv_remote_whitelist = r"^origin$"
 smv_outputdir_format = "{ref.name}"
