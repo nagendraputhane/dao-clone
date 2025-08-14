@@ -34,9 +34,6 @@ html_theme_options = {
         "json_url": "https://nagendraputhane.github.io/dao-clone/versions.json",
         "version_match": version,
     },
-    "external_links": [
-        {"name": "Home", "url": "https://nagendraputhane.github.io/dao-clone/"},
-    ],
     "icon_links": [
         {
             "name": "GitHub Repo",

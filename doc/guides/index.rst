@@ -1,6 +1,8 @@
 ..  SPDX-License-Identifier: Marvell-MIT
     Copyright (c) 2024 Marvell.
 
+.. rst-class:: home-landing
+
 Data Accelerator Offload (DAO) Documentation
 ============================================
 
@@ -8,10 +10,10 @@ Data Accelerator Offload (DAO) Documentation
    :maxdepth: 1
    :hidden:
 
-   intro
-   guides
-   resources
-   community_lab/index
+   Introduction <intro>
+   Guides <guides>
+   Resources <resources>
+   Community <community_lab/index>
 
 .. grid:: 1 1 2 2
    :gutter: 2 3 4 4
@@ -56,7 +58,7 @@ Data Accelerator Offload (DAO) Documentation
       **Resources**
       ^^^
 
-      Contributing, release notes, and FAQs.
+      Contributing, Release notes, and FAQs.
 
       +++
 
@@ -82,4 +84,4 @@ Data Accelerator Offload (DAO) Documentation
          :expand:
          :click-parent:
 
-         Launch the Community Lab
+         Launch the DAO Community Lab

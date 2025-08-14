@@ -95,6 +95,10 @@ jobs:
             sphinx-multiversion doc/guides build/html
             cp doc/guides/_static/versions.json build/html/versions.json
             cp -r build/html/dao-devel/* build/html/
+            if [ -d build/doc/api/html ]; then
+              mkdir -p build/html/api
+              cp -r build/doc/api/html/* build/html/api/
+            fi
             touch build/html/.nojekyll
       - name: Export version name
         id: artifacts
