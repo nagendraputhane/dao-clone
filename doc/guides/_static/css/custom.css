@@ -1,73 +1,127 @@
-/* =========================================================
-   DAO docs – final custom.css
-Light theme only (toggle hidden)
-Search icon only (no label/shortcut)
-Bigger logo (matches navbar height)
-Black/white look with dark-gray accent
-   ========================================================= */
-/* --- Global variables --- */
-:root{
-  --pst-navbar-height: 64px;         /* logo + navbar height */
-  --dao-accent-color: #1A1A1A;       /* single accent (dark gray) */
-  --dao-accent-color-hover: #000000; /* hover state */
-  --dao-border: #E5E5E5;             /* subtle card borders */
+/* ==========================================================================
+   DAO docs — customizations for PyData Sphinx Theme (light mode only)
+   --------------------------------------------------------------------------
+   Scope & intent:
+   - Minimal, predictable tweaks to layout, navbar, colors, and landing grid.
+   - Works when the docs are forced to light mode via layout.html.
+   - Uses PyData's DOM hooks (bd-*, navbar-*, etc.). Avoids RTD's wy-*.
+   - Keep selectors as specific as needed, but not brittle.
+
+   Maintenance notes:
+   - Prefer variables in :root for quick palette/spacing updates.
+   - Keep "theme overrides" together to spot breaking changes on theme upgrade.
+   - Landing page styles are opt-in via the "home-landing" rst-class.
+   ========================================================================== */
+
+
+/* === Design tokens (variables) ========================================== */
+:root {
+  /* Overall navbar height; also used to compute article min-height */
+  --pst-navbar-height: 64px;
+
+  /* Brand palette (black / dark gray accent) */
+  --dao-accent-color: #1A1A1A;
+  --dao-accent-color-hover: #000000;
+
+  /* Subtle border for cards and outlines */
+  --dao-border: #E5E5E5;
 }
-/* --- Logo size --- */
-.navbar-brand .logo__image{
+
+
+/* === Theme palette override (light only) ================================ */
+/* In light mode, map the theme's "primary" to our brand accent. */
+html[data-theme="light"] {
+  --pst-color-primary        : var(--dao-accent-color);
+  --pst-color-primary-light  : #2A2A2A;            /* hover/active ramps */
+  --pst-color-primary-dark   : var(--dao-accent-color-hover);
+  --pst-color-primary-invert : #FFFFFF;            /* text on primary bg */
+}
+
+
+/* === Global layout ====================================================== */
+/* Make article column fill the viewport so prev/next can pin to the bottom. */
+.bd-article-container {
+  display: flex;
+  flex-direction: column;
+  min-height: calc(100vh - var(--pst-navbar-height) - 120px); /* header + paddings */
+}
+
+/* Push the prev/next footer to the bottom when content is short. */
+.prev-next-footer {
+  margin-top: auto;
+}
+
+/* Slightly tighter H1 on inner pages (keeps landing title handled separately). */
+.bd-content .bd-article h1 {
+  font-size: 1.6rem;
+  line-height: 1.2;
+  margin-top: 0.25rem;
+  margin-bottom: 0.75rem;
+}
+
+/* Responsive adjustments for shorter viewports (e.g., mobile address bars). */
+@media (max-width: 768px) {
+  .bd-article-container {
+    min-height: calc(100vh - var(--pst-navbar-height) - 160px);
+  }
+}
+
+
+/* === Navbar (brand, spacing, mode, search) ============================== */
+/* Brand logo sizing (keeps aspect ratio while matching navbar height). */
+.navbar-brand .logo__image {
   height: var(--pst-navbar-height);
   max-height: var(--pst-navbar-height);
+  max-width: 220px;                 /* prevent oversized wide logos */
+  width: auto;
+  object-fit: contain;
 }
-/* --- Search: keep only the magnifier icon --- */
-.search-button__default-text,
-.search-button__kbd-shortcut,
-.navbar-persistent--container .search-button-field{
-  display: none !important;
-}
-/* --- Hide theme switch (we pin to light via conf.py) --- */
-.theme-switch-button{
-  display: none !important;
-}
-/* --- Navbar spacing: keep compact links --- */
-.bd-navbar .nav-link{
+
+/* Slightly tighter spacing between top-level navbar links. */
+.bd-navbar .nav-link {
   padding-left: 0.6rem;
   padding-right: 0.6rem;
 }
-/* =========================================================
-   Sphinx-design cards & buttons (remove purple)
-   ========================================================= */
-/* Cards */
-.sd-card{
-  border: 1px solid var(--dao-border) !important;
-  box-shadow: none !important;
-  background: #FFFFFF !important;
+
+/* Hide theme switcher (we force light mode in _templates/layout.html). */
+.theme-switch-button {
+  display: none !important;
 }
-.sd-card .sd-card-title{
-  color: #111111 !important;
-  font-weight: 600 !important;
+
+/* Search button: show only the magnifier icon (hide label/shortcut). */
+.search-button__default-text,
+.search-button__kbd-shortcut,
+.navbar-persistent--container .search-button-field {
+  display: none !important;
 }
-/* Buttons (button-ref) */
-.sd-btn{
-  background-color: var(--dao-accent-color) !important;
-  color: #FFFFFF !important;
-  border: none !important;
+
+/* Brand container spacing (keeps logo from crowding the first nav link). */
+.navbar-brand {
+  padding-right: 0.75rem;
 }
-.sd-btn:hover,
-.sd-btn:focus{
-  background-color: var(--dao-accent-color-hover) !important;
-  color: #FFFFFF !important;
+
+
+/* === Icon links (right side of navbar) ================================== */
+/* Display the built-in "sr-only" labels as visible text beside icons. */
+.navbar-icon-links .nav-link {
+  display: inline-flex;
+  align-items: center;
 }
-/* Outline buttons, just in case you use them later */
-.sd-btn-outline{
-  background: transparent !important;
-  color: var(--dao-accent-color) !important;
-  border: 1px solid var(--dao-accent-color) !important;
+
+.navbar-icon-links .sr-only {
+  position: static !important;  /* un-hide */
+  width: auto;
+  height: auto;
+  clip: auto;
+  clip-path: none;
+  display: inline !important;
+  white-space: nowrap;
+  margin-left: 0.35rem;          /* gap between icon and label */
 }
-.sd-btn-outline:hover,
-.sd-btn-outline:focus{
-  color: #FFFFFF !important;
-  background: var(--dao-accent-color) !important;
-}
-/* Links in content */
+
+
+/* === Links in content =================================================== */
+/* Neutral default links with subtle hover underline. */
 .bd-content a,
 .toctree-wrapper a {
   color: var(--dao-accent-color);
@@ -83,83 +137,49 @@ Black/white look with dark-gray accent
   text-underline-offset: 2px;
 }
 
-/* ── override PyData theme colour variables in light mode */
-html[data-theme="light"]{
-  /* primary accent used by headings, refs, badges, etc. */
-  --pst-color-primary          : var(--dao-accent-color);
-  --pst-color-primary-light    : #2A2A2A;   /* slightly lighter for hover states */
-  --pst-color-primary-dark     : var(--dao-accent-color-hover);
-  --pst-color-primary-invert   : #FFFFFF;   /* text on a primary-coloured bg */
+
+/* === Sphinx-design components (cards, buttons) ========================== */
+/* Cards: flat, subtle border, neutral background. */
+.sd-card {
+  border: 1px solid var(--dao-border) !important;
+  box-shadow: none !important;
+  background: #FFFFFF !important;
 }
 
-/* Show text next to the right-side icon links */
-.navbar-icon-links .nav-link {
-  display: inline-flex;
-  align-items: center;
+.sd-card .sd-card-title {
+  color: #111111 !important;
+  font-weight: 600 !important;
 }
 
-/* Reveal the built-in screen-reader label as visible text */
-.navbar-icon-links .sr-only {
-  position: static !important;
-  width: auto; height: auto;
-  clip: auto; clip-path: none;
-  display: inline !important;
-  white-space: nowrap;
-  margin-left: 0.35rem;
+/* Solid brand button. */
+.sd-btn {
+  background-color: var(--dao-accent-color) !important;
+  color: #FFFFFF !important;
+  border: none !important;
 }
 
-/* Smaller top page title (H1) ONLY */
-.bd-content .bd-article h1 {
-  font-size: 1.6rem;   /* still bigger than body (~1rem) */
-  line-height: 1.2;
-  margin-top: 0.25rem;
-  margin-bottom: 0.75rem;
+.sd-btn:hover,
+.sd-btn:focus {
+  background-color: var(--dao-accent-color-hover) !important;
+  color: #FFFFFF !important;
 }
 
-/* Smaller footer text: copyright + “Created using …” + “Built with …” */
-.bd-footer .footer-item p {
-  font-size: 0.85rem;   /* default body ~1rem, so this is smaller */
-  line-height: 1.3;
-  margin: 0.1rem 0;
+/* Outline button variant (brand stroke; fills on hover/focus). */
+.sd-btn-outline {
+  background: transparent !important;
+  color: var(--dao-accent-color) !important;
+  border: 1px solid var(--dao-accent-color) !important;
 }
 
-/* Hide “Built with the PyData Sphinx Theme …” */
-.bd-footer .theme-version { display: none !important; }
-
-/* Or hide the “Created using Sphinx …” line */
-.bd-footer .sphinx-version { display: none !important; }
-
-.navbar-brand { padding-right: .75rem; }
-.navbar-brand .logo__image {
-  max-width: 220px;
-  width: auto;
-  object-fit: contain;
+.sd-btn-outline:hover,
+.sd-btn-outline:focus {
+  color: #FFFFFF !important;
+  background: var(--dao-accent-color) !important;
 }
 
-/* If a design grid comes right after the title, add a touch more spacing */
-.bd-article > .sd-container,
-.bd-article > .sd-container-fluid {
-  margin-top: 0.5rem;
-}
 
-/* Make the article area fill the viewport height so prev/next can sit at the bottom */
-.bd-article-container {
-  display: flex;
-  flex-direction: column;
-  /* header is ~64px; give some buffer for top/bottom paddings */
-  min-height: calc(100vh - var(--pst-navbar-height) - 120px);
-}
-/* Push the prev/next footer to the bottom when content is short */
-.prev-next-footer {
-  margin-top: auto;
-}
-
-@media (max-width: 768px) {
-  .bd-article-container {
-    min-height: calc(100vh - var(--pst-navbar-height) - 160px);
-  }
-}
-
+/* === Landing page (opt-in via ".. rst-class:: home-landing") ============ */
+/* Center the landing page H1 and give it breathing room. */
 section.home-landing > h1 {
   text-align: center;
 }
@@ -167,10 +187,29 @@ section.home-landing > h1 {
 .bd-content .bd-article .home-landing > h1 {
   text-align: center;
   margin-bottom: 2.25rem;
-  padding-bottom: 0.25rem;
+  padding-bottom: 0.25rem;  /* soft visual anchor above the grid */
 }
 
+/* Add a touch of spacing between title and the grid/container that follows. */
 .bd-content .bd-article .home-landing > .sd-container,
 .bd-content .bd-article .home-landing > .sd-container-fluid {
   margin-top: 1rem;
+}
+
+
+/* === Footer ============================================================= */
+/* Slightly smaller footer text for copyright/credits. */
+.bd-footer .footer-item p {
+  font-size: 0.85rem;
+  line-height: 1.3;
+  margin: 0.1rem 0;
+}
+
+/* Hide theme/version boilerplate. */
+.bd-footer .theme-version {
+  display: none !important;
+}
+
+.bd-footer .sphinx-version {
+  display: none !important;
 }

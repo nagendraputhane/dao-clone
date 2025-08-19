@@ -16,29 +16,35 @@ jobs:
   ubuntu-cn10k-build:
     name: ubuntu-cn10k-arm64
     runs-on: ubuntu-24.04-arm
+
     steps:
       - name: Checkout sources
         uses: actions/checkout@v4.2.2
         with:
-          fetch-depth: 0
+          fetch-depth: 0  # fetch all history/tags for SMV and version logic
+
       - name: Generate cache keys
         id: get_ref_keys
         run: |
-          echo 'ccache=ccache-'$(date -u +%Y-m%M) >> $GITHUB_OUTPUT
+          echo 'ccache=ccache-'$(date -u +%Y-%m) >> $GITHUB_OUTPUT
+
       - name: Retrieve ccache cache
-        uses: actions/cache@v4
+        uses: actions/cache@v4.2.3
         with:
           path: ~/.ccache
           key: ${{ steps.get_ref_keys.outputs.ccache }}-${{ github.ref }}
           restore-keys: |
             ${{ steps.get_ref_keys.outputs.ccache }}-refs/heads/main
+
       - name: Extract version details
         id: version
         run: |
           mkdir -p "${PWD}/artifacts"
+          # PKG_POSTFIX and NIGHTLY distinguish tagged builds from devel
           git tag --points-at HEAD > /tmp/tags
           [ -s /tmp/tags ] && PKG_POSTFIX= || PKG_POSTFIX=-devel
           [ -s /tmp/tags ] && NIGHTLY=false || NIGHTLY=true
+
           echo "PKG_VERSION_NAME=`cat VERSION`" >> "${PWD}/artifacts/env"
           echo "DPDK_PKG_VERSION=`cat DPDK_VERSION | grep RELEASE_VERSION | awk -F'=' '{print $2}'`" >> "${PWD}/artifacts/env"
           echo "DPDK_BASE_PKG_VERSION=`cat DPDK_VERSION | grep BASE_VERSION | awk -F'=' '{print $2}' | awk -F'.' '{print $1"."$2}'`" >> "${PWD}/artifacts/env"
@@ -47,15 +53,16 @@ jobs:
           echo "NIGHTLY=${NIGHTLY}" >> $GITHUB_OUTPUT
           echo "DPDK_PKG_VERSION=${DPDK_PKG_VERSION}" >> $GITHUB_OUTPUT
           echo "DPDK_BASE_PKG_VERSION=${DPDK_BASE_PKG_VERSION}" >> $GITHUB_OUTPUT
+
       - name: Build DAO and generate package
         id: build
         run: |
+            set -euo pipefail
             mkdir -p ~/.ccache
             sudo apt-get update -q -y
             sudo apt-get install -y build-essential gcc meson ccache git doxygen apt-utils
             sudo apt-get install -y libnl-3-dev libnl-route-3-dev libnl-xfrm-3-dev
             sudo apt-get install -y sphinx-common python3-pip pkg-config
-            pip install "pydata-sphinx-theme>=0.16" "sphinx-multiversion>=0.2.4" "sphinx-copybutton" "sphinx-design"
             sudo apt-get install -y libarchive-dev libbsd-dev libbpf-dev
             sudo apt-get install -y libfdt-dev libjansson-dev software-properties-common
             sudo apt-get install -y libssl-dev ninja-build python3-pip
@@ -63,6 +70,13 @@ jobs:
             sudo apt-get install -y gcc-14 bzip2-doc icu-devtools libacl1-dev libattr1-dev
             sudo apt-get install -y libbz2-dev libgmp-dev libgmpxx4ldbl libicu-dev liblz4-dev
             sudo apt-get install -y liblzma-dev libxml2-dev libzstd-dev nettle-dev wget lsb-release
+            # ---- Python doc ----
+            python3 -m pip install --upgrade pip
+            python3 -m pip install "sphinx>=7.0.0" \
+                                  "pydata-sphinx-theme>=0.16" \
+                                  "sphinx-multiversion>=0.2.4" \
+                                  "sphinx-copybutton" \
+                                  "sphinx-design"
             DISTRO=ubuntu-`lsb_release -rs`
             source "${PWD}/artifacts/env"
             git fetch --all --tags --prune
@@ -80,8 +94,8 @@ jobs:
             mkdir -p "${PWD}/install/debian"
             cd "${PWD}/install"
             echo 'Source: DAO' > debian/control
-            echo 'Package: dao-cn10k'$PKG_POSTFIX >> DEBIAN/control
-            echo 'Version: '$PKG_VERSION_NAME >> DEBIAN/control
+            echo 'Package: dao-cn10k'${PKG_POSTFIX} >> DEBIAN/control
+            echo 'Version: '${PKG_VERSION_NAME} >> DEBIAN/control
             echo "Depends: `dpkg-shlibdeps --ignore-missing-info -O bin/dao-crypto-agent bin/dao-ovs-offload bin/dao-secgw-graph bin/dao-smart-nic bin/dao-virtio-l2fwd | awk -F'Depends=' '{print $2}'` , dpdk-${DPDK_BASE_PKG_VERSION}-cn10k (= ${DPDK_PKG_VERSION})" >> DEBIAN/control
             echo "Maintainer: Jerin Jacob (jerinj@marvell.com)" >> DEBIAN/control
             echo "Architecture: arm64" >> DEBIAN/control
@@ -92,28 +106,47 @@ jobs:
             mv "${PWD}/install" "${PWD}/dao-cn10k${PKG_POSTFIX}_${PKG_VERSION_NAME}_arm64"
             dpkg --build "dao-cn10k${PKG_POSTFIX}_${PKG_VERSION_NAME}_arm64"
             cp "dao-cn10k${PKG_POSTFIX}_${PKG_VERSION_NAME}_arm64.deb" ${BASE_DIR}/artifacts/.
-            sphinx-multiversion doc/guides build/html
-            cp doc/guides/_static/versions.json build/html/versions.json
-            cp -r build/html/dao-devel/* build/html/
+
+            # ---- Build multi-version docs with SMV to a temp folder ----
+            # We first build to build/smv_html/<version>/ then arrange into /guides/.
+            sphinx-multiversion doc/guides build/smv_html
+
+            # Final site layout will be:
+            #   build/html/guides/          -> default docs (dao-devel content)
+            #   build/html/guides/<version> -> all versions
+            #   build/html/api/             -> API docs
+            mkdir -p build/html/guides
+            cp -r build/smv_html/* build/html/guides/
+
+            # Version switcher manifest at /guides/versions.json
+            cp doc/guides/_static/versions.json build/html/guides/versions.json
+
+            # Make /guides/ render the dev version by default
+            if [ -d build/html/guides/dao-devel ]; then
+              cp -r build/html/guides/dao-devel/* build/html/guides/
+            fi
+
+            # API docs at /api/
             if [ -d build/doc/api/html ]; then
               mkdir -p build/html/api
               cp -r build/doc/api/html/* build/html/api/
             fi
+
+            # Required for GitHub Pages to serve files under underscores
             touch build/html/.nojekyll
+
       - name: Export version name
         id: artifacts
         run: |
           source "${PWD}/artifacts/env"
-          echo $PKG_VERSION_NAME
           echo "PKG_VERSION_NAME=${PKG_VERSION_NAME}" >> "$GITHUB_OUTPUT"
-          echo $PKG_POSTFIX
           echo "PKG_POSTFIX=${PKG_POSTFIX}" >> "$GITHUB_OUTPUT"
-          echo $DISTRO
           echo "DISTRO=${DISTRO}" >> "$GITHUB_OUTPUT"
           [[ "$PKG_POSTFIX" == "-devel" ]] && TAG=devel || TAG=${PKG_VERSION_NAME}
           [[ "$PKG_POSTFIX" == "-devel" ]] && IS_DEVEL="true" || IS_DEVEL="false"
           echo "TAG=${TAG}" >> "$GITHUB_OUTPUT"
           echo "IS_DEVEL=${IS_DEVEL}" >> "$GITHUB_OUTPUT"
+
       - name: Delete existing release
         if: ${{ github.event_name == 'push' }}
         env:
@@ -121,6 +154,7 @@ jobs:
         run: |
           gh release delete dao-cn10k-${{ steps.artifacts.outputs.PKG_VERSION_NAME }}-${{ steps.artifacts.outputs.DISTRO }}-${{ steps.artifacts.outputs.TAG }} --cleanup-tag -y
         continue-on-error: true
+
       - name: Release DAO cn10k package
         uses: softprops/action-gh-release@v2.2.2
         if: ${{ github.event_name == 'push' }}
@@ -129,11 +163,13 @@ jobs:
           tag_name: dao-cn10k-${{ steps.artifacts.outputs.PKG_VERSION_NAME }}-${{ steps.artifacts.outputs.DISTRO }}-${{ steps.artifacts.outputs.TAG }}
           files: |
             ${{ github.workspace }}/artifacts/dao-cn10k${{ steps.artifacts.outputs.PKG_POSTFIX }}_${{ steps.artifacts.outputs.PKG_VERSION_NAME }}_arm64.deb
+
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
         if: ${{ github.event_name == 'push' }}
         with:
-          path: build/html
+          path: build/html  # publish the multi-version site root
+
       - name: Deploy Github Pages
         if: ${{ github.event_name == 'push' }}
         uses: actions/deploy-pages@v4.0.5

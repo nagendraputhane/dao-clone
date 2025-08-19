@@ -1,5 +1,4 @@
 ..  SPDX-License-Identifier: Marvell-MIT
-    Copyright (c) 2024 Marvell.
 
 .. rst-class:: home-landing
 
@@ -9,6 +8,7 @@ Data Accelerator Offload (DAO) Documentation
 .. toctree::
    :maxdepth: 1
    :hidden:
+   :caption: Sections
 
    Introduction <intro>
    Guides <guides>

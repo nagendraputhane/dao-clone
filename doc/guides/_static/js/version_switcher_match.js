@@ -1,33 +1,34 @@
-// Keep the version switcher label in sync with the URL (works with sphinx-multiversion)
+// Sync the version switcher with current path.
+// This variant expects the docs to live under /dao-clone/guides/...
+// TODO(live): replace /dao-clone/ with /dao/ in the regex below.
+
 (function () {
   function currentVersionFromPath() {
-    var m = (location.pathname || "").match(/\/dao-clone\/([^/]+)\//);
-    return (m && m[1]) ? m[1] : "dao-devel";  // default on site root
+    var m = (location.pathname || "").match(/\/dao-clone\/guides\/([^/]+)\//);
+    return (m && m[1]) ? m[1] : "dao-devel";  // default on /dao-clone/guides/
   }
   function labelFor(v) {
     if (v === "dao-devel") return "latest (dev)";
-    var m = v.match(/^dao-(.+)$/);
-    return m ? m[1] : v;
+    var mm = v.match(/^dao-(.+)$/);
+    return mm ? mm[1] : v;
   }
   var v = currentVersionFromPath();
 
-  // Update the config (used by theme scripts)
+  // Inform theme scripts
   if (window.DOCUMENTATION_OPTIONS) {
     window.DOCUMENTATION_OPTIONS.theme_switcher_version_match = v;
   }
 
-  // After the theme initializes, fix the button label & active item.
   function apply() {
     try {
       var btn = document.querySelector('[id^="pst-version-switcher-button"]');
       if (!btn) return;
 
-      // Set button text
-      // Button text node is the first child text; safest approach: overwrite textContent.
+      // Set visible label
       btn.childNodes[0] && (btn.childNodes[0].nodeValue = labelFor(v));
       btn.textContent = labelFor(v);
 
-      // Mark active item in the dropdown if it’s been built
+      // Highlight active entry
       var menuId = btn.getAttribute("aria-controls");
       var menu = menuId && document.getElementById(menuId);
       if (menu) {
@@ -43,7 +44,6 @@
     } catch (e) {}
   }
 
-  // Run after DOM ready, then again after theme finishes populating
   document.addEventListener("DOMContentLoaded", function () {
     apply();
     setTimeout(apply, 100);
